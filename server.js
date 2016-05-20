@@ -76,13 +76,12 @@ app.get('/crop', function(req, res){
 });
 
 app.get('/images', function (req, res) {
-		var originals = fs.readdirSync(options.root+options.originals);
 		var thumbnails = fs.readdirSync(options.root+options.thumbnails);
 		var jsonResponse = {locations:[], mediumHeight:0, mediumWidth:0};
 		var mediumHeight = 0;
 		var mediumWidth = 0;
 		if(originals != "undefined" && thumbnails != "undefined"){
-				for(var i = 0; i < thumbnails.length; i++){
+				for(var i = 1; i < thumbnails.length; i++){
 						var fname = thumbnails[i].substring(0, thumbnails[i].length-4);
 						jsonResponse.locations.push({
 								thumbnail:  options.url+options.thumbnails+thumbnails[i],
