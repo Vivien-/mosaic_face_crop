@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Paint</title>
+		<link rel="stylesheet" type="text/css" href="../css/styles.css">
+		<link rel="stylesheet" type="text/css" href="../css/style.css">
+	</head>
+	<body>
+		<a class="button" href="/mosaic">Mosaic</a>
+		<button id="crop" type="button">Validate ROI</button> 
+		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position: absolute; right: 200px">
+			<input type="file" name="pic">
+			<input type="submit" value="Upload photo">
+		</form>
+
+		<div id="image_container">
+			<img id="image" src="" alt="image_holder">
+		</div>
+		<canvas id="canvas" height=0 width=0></canvas>
+		<script type="text/javascript" src="../js/script.js"></script>
+		<script type="text/javascript" src="../js/send_data.js"></script>
+	</body>
+</html>
