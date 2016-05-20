@@ -1,8 +1,13 @@
 # Installation
 
-Il faut nodejs, l'installation dépende de l'os mais tout est très bien expliqué ici (même pour mac) : https://nodejs.org/en/
+## Prérequis
 
-`git pull https://github.com/Vivien-/mosaic_face_crop.git`
+1. nodejs, l'installation dépende de l'os mais tout est très bien expliqué ici (même pour mac) : https://nodejs.org/en/
+2. npm
+
+`git clone https://github.com/Vivien-/mosaic_face_crop.git`
+
+`npm install` install les dépendances
 
 # Run 
 
