@@ -17,7 +17,7 @@ function appendImages(data){
 		json = JSON.parse(data);
 		var locations = json.locations;
 		for(var i = 0; i < locations.length; i++){
-				$("#links").append(" <a href='"+locations[i].original+"'><img src='"+locations[i].thumbnail+"'></a>")
+				$("#links").append(" <a href='"+locations[i].original+"'><img src='"+locations[i].thumbnail + "' style='height:"+json.mediumHeight+"px; width:"+json.mediumWidth+"px;'></a>")
 		}
 
 		//Mosaic stuff

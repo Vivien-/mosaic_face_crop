@@ -17,8 +17,19 @@ var canvas_width = 0;
 var canvas_height = 0;
 
 //set image
-var filepath = location.search.split('file=')[1];
-if(typeof filepath != 'undefined') {
+
+function getURLParameter(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+}
+
+var filepath = getURLParameter('file');
+
+var rect = {x: getURLParameter('x'), 
+					 y: getURLParameter('y'),
+					 w: getURLParameter('w'),
+					 h: getURLParameter('h') };
+
+if(filepath != null) {
 		image.src = filepath;
 		canvas_height = 0;
 		canvas_width = 0;
@@ -122,6 +133,14 @@ function load() {
 				that_canvas.style.height = canvas_height + 'px';
 				that_canvas.style.top = 10 + '%';
 				that_canvas.style.left = 10 + '%';
+				
+				context.rect(rect.x, rect.y, rect.w, rect.h);
+				context.fillStyle = "#FFEFA3";
+				context.fill();
+				setROI(rect.x, rect.y, rect.w, rect.h);
+				context.lineWidth = 2;
+				context.strokeStyle = 'orangered';
+				context.stroke();
 		} 
 } 
 

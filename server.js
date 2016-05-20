@@ -4,14 +4,17 @@ const fs = require('fs');
 var easyimg = require('easyimage');    //for image manipulation
 var busboy = require('connect-busboy'); //middleware for form/file upload
 var multer = require('multer');
+var exec = require('child_process').execFile;
+var sizeOf = require('image-size');
 
 var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, options.root+options.originals)
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + '.png')
-  }
+		destination: function (req, file, cb) {
+				cb(null, options.root+options.originals)
+		},
+		filename: function (req, file, cb) {
+				var format = file.mimetype.split('/')[1];
+				cb(null, file.fieldname + '-' + Date.now() + '.' + format)
+		}
 })
 
 var options = {
@@ -35,8 +38,13 @@ app.get('/mosaic', function(req, res){
 app.post('/upload', function(req, res) {
 		if(typeof req.file === 'undefined')
 				res.redirect('/');
-		else
-				res.redirect('/?file=' + options.originals + req.file.filename);
+		else {
+				exec('./bin/get_roi', [options.root + options.originals + req.file.filename],function(err, data) {  
+						var rect = String(data).split(',');
+						var rectStr = '&x=' + parseInt(rect[0]) + '&y=' + parseInt(rect[1]) + '&w=' + parseInt(rect[2]) + '&h=' + parseInt(rect[3]);
+						res.redirect('/?file=' + options.originals + req.file.filename + rectStr);
+				});
+		}
 });
 
 app.get('/crop', function(req, res){
@@ -52,7 +60,7 @@ app.get('/crop', function(req, res){
 				gravity: 'NorthWest',
 				fill: true,
 				ignoreAspectRatio: true,
-				dst: options.root+options.thumbnails+filename
+				dst: options.root+options.thumbnails+filename + ".png"
 		}).then(function (file) {
         file.should.be.a('object');
         file.should.have.property('width');
@@ -71,14 +79,22 @@ app.get('/crop', function(req, res){
 app.get('/images', function (req, res) {
 		var originals = fs.readdirSync(options.root+options.originals);
 		var thumbnails = fs.readdirSync(options.root+options.thumbnails);
-		var jsonResponse = {locations:[]};
+		var jsonResponse = {locations:[], mediumHeight:0, mediumWidth:0};
+		var mediumHeight = 0;
+		var mediumWidth = 0;
 		if(originals != "undefined" && thumbnails != "undefined"){
 				for(var i = 0; i < thumbnails.length; i++){
+						var fname = thumbnails[i].substring(0, thumbnails[i].length-4);
 						jsonResponse.locations.push({
-								thumbnail: options.url+options.thumbnails+thumbnails[i],
-								original: options.url+options.originals+thumbnails[i]
+								thumbnail:  options.url+options.thumbnails+thumbnails[i],
+								original:  options.url+options.originals+fname
 						});
+						var dimensions = sizeOf(options.root+options.thumbnails+thumbnails[i]);
+						mediumHeight += dimensions.height;
+						mediumWidth += dimensions.width;
 				}
+				jsonResponse.mediumHeight = mediumHeight/thumbnails.length;
+				jsonResponse.mediumWidth = mediumWidth/thumbnails.length;
 		}
 		res.send(jsonResponse);
 });
