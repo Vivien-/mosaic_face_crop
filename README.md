@@ -7,7 +7,9 @@ Nodejs
 ## Usage
 
 git clone https://github.com/Vivien-/mosaic_face_crop.git
+
 cd $root
+
 node server.js
 
 (The listening port is 3000)
