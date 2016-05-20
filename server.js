@@ -2,7 +2,6 @@ var express = require('express');   //express web server
 var app = express();
 const fs = require('fs');
 var easyimg = require('easyimage');    //for image manipulation
-var busboy = require('connect-busboy'); //middleware for form/file upload
 var multer = require('multer');
 var exec = require('child_process').execFile;
 var sizeOf = require('image-size');
@@ -18,7 +17,7 @@ var storage = multer.diskStorage({
 })
 
 var options = {
-    root: "/home/vivien/olebreton/drawable/public",
+    root: "public",
     url: "http://localhost:3000",
 		originals: "/img/originals/",
 		thumbnails: "/img/thumbnails/"
@@ -39,7 +38,7 @@ app.post('/upload', function(req, res) {
 		if(typeof req.file === 'undefined')
 				res.redirect('/');
 		else {
-				exec('./bin/get_roi', [options.root + options.originals + req.file.filename],function(err, data) {  
+				exec('./get_roi', [options.root + options.originals + req.file.filename],function(err, data) {  
 						var rect = String(data).split(',');
 						var rectStr = '&x=' + parseInt(rect[0]) + '&y=' + parseInt(rect[1]) + '&w=' + parseInt(rect[2]) + '&h=' + parseInt(rect[3]);
 						res.redirect('/?file=' + options.originals + req.file.filename + rectStr);
