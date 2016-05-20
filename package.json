@@ -1,0 +1,28 @@
+{
+  "name": "drawable",
+  "version": "1.0.0",
+  "description": "Il faut nodejs, l'installation dépende de l'os mais tout est très bien expliqué ici (même pour mac) : https://nodejs.org/en/",
+  "main": "config.js",
+  "dependencies": {
+    "easyimage": "^2.1.0",
+    "express": "^4.13.4",
+    "image-size": "^0.5.0",
+    "multer": "^1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vivien-/mosaic_face_crop.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vivien-/mosaic_face_crop/issues"
+  },
+  "homepage": "https://github.com/Vivien-/mosaic_face_crop#readme"
+}
