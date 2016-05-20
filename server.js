@@ -77,6 +77,7 @@ app.get('/crop', function(req, res){
 
 app.get('/images', function (req, res) {
 		var thumbnails = fs.readdirSync(options.root+options.thumbnails);
+		var thumbnails = fs.readdirSync(options.root+options.originals);
 		var jsonResponse = {locations:[], mediumHeight:0, mediumWidth:0};
 		var mediumHeight = 0;
 		var mediumWidth = 0;
