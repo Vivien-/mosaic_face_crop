@@ -7,6 +7,8 @@
 
 `git clone https://github.com/Vivien-/mosaic_face_crop.git`
 
+`cd mosaic_face_crop`
+
 `npm install` install les dépendances
 
 # Run 
