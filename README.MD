@@ -13,6 +13,12 @@
 
 `npm install` install les dépendances
 
+#Configuration
+
+Le fichier config.js permet de configurer votre application :
+Modifiez `config.options.root` par le chemin `$root/public`
+Modifiez `config.port` par le port sur lequel vous voulez lancer l'application
+
 # Run 
 
 1. Pour lancer l'appli, se déplacer dans $root et lancer la commande suivante : `node server.js`
