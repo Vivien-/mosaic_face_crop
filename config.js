@@ -1,15 +1,15 @@
 var config = {};
 
+
+//port
+config.port = 3000;
+
 //paths
 config.options = {
 	root: "/home/med/medApps/mosaic/public",
     originals: "/img/originals/",
     thumbnails: "/img/thumbnails/",
-    url: "http://localhost:3000"
+    url: "http://localhost:"+config.port
 }
-//port
-config.port = 3000;
-
-
 
 module.exports = config;
