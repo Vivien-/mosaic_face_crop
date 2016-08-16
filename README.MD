@@ -11,7 +11,8 @@
 
 `cd mosaic_face_crop`
 
-`npm install` install les dépendances
+`npm install` 
+install les dépendances
 
 #Configuration
 
