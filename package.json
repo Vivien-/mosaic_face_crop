@@ -4,6 +4,7 @@
   "description": "Il faut nodejs, l'installation dépende de l'os mais tout est très bien expliqué ici (même pour mac) : https://nodejs.org/en/",
   "main": "config.js",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "easyimage": "^2.1.0",
     "express": "^4.13.4",
     "image-size": "^0.5.0",

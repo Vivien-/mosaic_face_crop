@@ -8,7 +8,11 @@
 	</head>
 	<body>
 		<a class="button" href="/mosaic">Mosaic</a>
-		<button id="crop" type="button">Validate ROI</button> 
+		<button id="crop" type="button">Validate ROI</button>
+		<div id="croping" class="hide">Croping the chosen area...</div>
+		<div id="croped" class="hide">Done !</div>
+		<div id="error" class="hide"></div>
+		
 		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position: absolute; right: 200px">
 			<input type="file" name="pic">
 			<input type="submit" value="Upload photo">

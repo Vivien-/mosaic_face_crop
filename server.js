@@ -1,5 +1,8 @@
 var express = require('express');   //express web server 
 var app = express();
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 const fs = require('fs');
 var easyimg = require('easyimage');    //for image manipulation
 var multer = require('multer');
@@ -38,38 +41,46 @@ app.post('/upload', function(req, res) {
 		if(typeof req.file === 'undefined')
 				res.redirect('/');
 		else {
-				exec('./get_roi', [options.root + options.originals + req.file.filename],function(err, data) {  
-						var rect = String(data).split(',');
-						var rectStr = '&x=' + parseInt(rect[0]) + '&y=' + parseInt(rect[1]) + '&w=' + parseInt(rect[2]) + '&h=' + parseInt(rect[3]);
-						res.redirect('/?file=' + options.originals + req.file.filename + rectStr);
+				exec('./get_roi', [options.root + options.originals + req.file.filename],function(err, data) {
+						var rectsStr = "&rects=" + data;
+						res.redirect('/?file=' + options.originals + req.file.filename + rectsStr);
 				});
 		}
 });
 
-app.get('/crop', function(req, res){
-		var filename = req.query.src.replace(/^.*[\\\/]/, '');
-		easyimg.crop({
-				src: options.root+options.originals+filename, 
-				cropwidth: req.query.w,
-				cropheight: req.query.h,
-				width: req.query.w,
-				height: req.query.h,
-				x: req.query.left, 
-				y: req.query.top,
-				gravity: 'NorthWest',
-				fill: true,
-				ignoreAspectRatio: true,
-				dst: options.root+options.thumbnails+filename + ".png"
-		}).then(function (file) {
-        file.should.be.a('object');
-        file.should.have.property('width');
-        file.width.should.be.equal(req.query.w);
-        file.should.have.property('height');
-        file.width.should.be.equal(req.query.h);
-        file.name.should.be.equal(filename);
-    }, function (err) {
-				console.log(err);
-		});
+app.post('/crop', function(req, res){
+		var data = req.body;
+		
+		var cropImg = function(w, h, left, top, index) {
+				easyimg.crop({
+						src: options.root+options.originals+filename, 
+						cropwidth: w,
+						cropheight: h,
+						width: w,
+						height: h,
+						x: left, 
+						y: top,
+						gravity: 'NorthWest',
+						fill: true,
+						ignoreAspectRatio: true,
+						dst: options.root+options.thumbnails+filename + "_" +index + ".png"
+				}).then(function (file) {
+						file.should.be.a('object');
+						file.should.have.property('width');
+						file.width.should.be.equal(w);
+						file.should.have.property('height');
+						file.width.should.be.equal(h);
+						file.name.should.be.equal(filename);
+				}, function (err) {
+						console.log(err);
+				});
+		}
+
+		var filename = data[0].src.replace(/^.*[\\\/]/, '');
+		for(var i = 0; i < data.length; ++i) {
+				var cur = data[i];
+				cropImg(cur.w, cur.h, cur.left, cur.top, i);
+		}
 		
 		options.uploaded = true;
 		res.redirect('/mosaic');

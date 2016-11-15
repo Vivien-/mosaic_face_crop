@@ -1,14 +1,14 @@
 var canvas, context, startX, endX, startY, endY;
 var mouseIsDown = 0;
 
-var roi = {top: 0, left: 0, w: 0, h: 0, src:"/"};
+var rois = [];
 
 var w = window,
-d = document,
-e = d.documentElement,
-g = d.getElementsByTagName('body')[0],
-x = w.innerWidth || e.clientWidth || g.clientWidth,
-y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+		d = document,
+		e = d.documentElement,
+		g = d.getElementsByTagName('body')[0],
+		x = w.innerWidth || e.clientWidth || g.clientWidth,
+		y = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
 var that_canvas = d.getElementById("canvas");
 var image = d.getElementById("image");
@@ -19,21 +19,32 @@ var canvas_height = 0;
 //set image
 
 function getURLParameter(name) {
-  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
+		return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
 }
 
 var filepath = getURLParameter('file');
 
 var rect = {x: getURLParameter('x'), 
-					 y: getURLParameter('y'),
-					 w: getURLParameter('w'),
-					 h: getURLParameter('h') };
+						y: getURLParameter('y'),
+						w: getURLParameter('w'),
+						h: getURLParameter('h') };
+
+var rects = JSON.parse(getURLParameter('rects'));
 
 if(filepath != null) {
 		image.src = filepath;
 		canvas_height = 0;
 		canvas_width = 0;
 		load();
+}
+
+var previous = {l: 0, t: 0, w: 0, h: 0};
+
+function setPrevious(l, t, w, h) {
+		previous.l = l;
+		previous.t = t;
+		previous.w = w;
+		previous.h = h;
 }
 
 
@@ -52,16 +63,61 @@ function mouseUp(eve) {
 				var pos = getMousePos(canvas, eve);
 				endX = pos.x;
 				endY = pos.y;
+				setPrevious(0, 0, 0, 0); // don't delete other rect
 				drawSquare(); //update on mouse-up
+				addROI(startX, startY, Math.abs(endX - startX), Math.abs(endY - startY));
 		}
 }
 
-function mouseDown(eve) {
+function handleDrag(eve) {
 		mouseIsDown = 1;
+		setPrevious(0, 0, 0, 0); // don't delete other rect
 		var pos = getMousePos(canvas, eve);
 		startX = endX = pos.x;
 		startY = endY = pos.y;
 		drawSquare(); //update
+}
+
+function getDistance(mPose, rect) {
+		var rPose = {x: rect.left + (rect.w/2), y: rect.top + (rect.h/2)};
+		var dx = Math.max(Math.abs(mPose.x - rPose.x) - rect.w / 2, 0);
+		var dy = Math.max(Math.abs(mPose.y - rPose.y) - rect.h / 2, 0);
+		return dx * dx + dy * dy;
+}
+
+function selectClosestRect(eve) {
+		var distance = canvas_width * canvas_width + canvas_height * canvas_height;
+		var roi = rois[0];
+		var pos = getMousePos(canvas, eve);
+		var index = -1;
+		for(var i = 0; i < rois.length; ++i) {
+				var d = getDistance(pos, rois[i]);
+				if(d < distance) {
+						distance = d;
+						roi = rois[i];
+						index = i;
+				}
+		}
+		return {"roi": roi, "index": index};
+}
+
+function handleSelect(eve) {
+		var data = selectClosestRect(eve);
+		var roi = data.roi;
+		context.clearRect(roi.left-2, roi.top-2, roi.w+4, roi.h+4);
+		console.log(roi);
+		if(data.index > -1) {
+				rois.splice(data.index, 1);
+				console.log(rois.length);
+		}
+}
+
+function mouseDown(eve) {
+		if(eve.ctrlKey) {
+				handleSelect(eve);
+		} else {
+				handleDrag(eve);
+		}
 }
 
 function mouseXY(eve) {
@@ -83,15 +139,15 @@ function drawSquare() {
 		var width = Math.abs(w);
 		var height = Math.abs(h);
 
-		context.clearRect(0, 0, canvas.width, canvas.height);
-    
-		context.beginPath();
-		context.rect(startX + offsetX, startY + offsetY, width, height);
-		context.fillStyle = "#FFEFA3";
-		context.fill();
-		setROI(startX, startY, width, height);
+		context.clearRect(previous.l, previous.t, previous.w, previous.h);
+		setPrevious(startX + offsetX-2, startY + offsetY-2, width+4, height+4);
+
 		context.lineWidth = 2;
 		context.strokeStyle = 'orangered';
+		context.fillStyle = "#FFEFA3";
+		context.beginPath();
+		context.rect(startX + offsetX, startY + offsetY, width, height);
+		context.fill();
 		context.stroke();
 
 }
@@ -112,19 +168,20 @@ function getFirstChild(el){
 		return firstChild;
 }
 
-function setROI(l, t, w, h) {
+function addROI(l, t, w, h) {
+		var roi = {top: 0, left: 0, w: 0, h: 0, src:"/"};
 		roi.src = image.getAttribute("src");
 		roi.left = Math.floor(l);
 		roi.top = Math.floor(t);
 		roi.w = w;
 		roi.h = h;
-		console.log(roi);
+		rois.push(roi);
 }
 
 function load() { 
 		canvas_width = image.offsetWidth;
 		canvas_height = image.offsetHeight;
-		if (canvas_height == 0) { 
+		if (canvas_height < 100) { 
 				setTimeout(load, 5); 
 		} else { 
 				that_canvas.setAttribute("width", canvas_width);
@@ -133,16 +190,20 @@ function load() {
 				that_canvas.style.height = canvas_height + 'px';
 				that_canvas.style.top = 10 + '%';
 				that_canvas.style.left = 10 + '%';
-				
-				context.rect(rect.x, rect.y, rect.w, rect.h);
-				context.fillStyle = "#FFEFA3";
-				context.fill();
-				setROI(rect.x, rect.y, rect.w, rect.h);
+
 				context.lineWidth = 2;
 				context.strokeStyle = 'orangered';
-				context.stroke();
+				context.fillStyle = "#FFEFA3";
+
+				for(var i = 0; i < rects.length; ++i) {
+						context.beginPath();
+						context.rect(rects[i].left, rects[i].top, rects[i].width, rects[i].height);
+						context.fill();
+						addROI(rects[i].left, rects[i].top, rects[i].width, rects[i].height);
+						context.stroke();
+				}
 		} 
 } 
 
 init();
-load();
+
