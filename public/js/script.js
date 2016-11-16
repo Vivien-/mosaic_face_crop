@@ -197,8 +197,6 @@ function load() {
 				that_canvas.setAttribute("height", canvas_height);
 				that_canvas.style.width = canvas_width + 'px';
 				that_canvas.style.height = canvas_height + 'px';
-				that_canvas.style.top = 10 + '%';
-				that_canvas.style.left = 10 + '%';
 
 				context.lineWidth = conf.lineWidth;
 				context.strokeStyle = conf.strokeStyle;

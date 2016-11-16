@@ -4,12 +4,14 @@ canvas {
 		position: absolute;
 		z-index: 100;
 		opacity: 0.6;
+		top: 80px;
+    left: 40px;
 }
 
 #image_container {
 		position: absolute;
-		top: 10%;
-		left: 10%;
+		top: 80px;
+		left: 40px;
 		width: 80%
 		height: 80%;
 		z-index: 1;
