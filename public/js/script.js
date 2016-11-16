@@ -16,6 +16,11 @@ var image = d.getElementById("image");
 var canvas_width = 0;
 var canvas_height = 0;
 
+var conf = { "lineWidth": 8,
+						 "strokeStyle": "#333399",
+						 "fillStyle": "#3F7FBF"
+					 };
+
 //set image
 
 function getURLParameter(name) {
@@ -101,14 +106,18 @@ function selectClosestRect(eve) {
 		return {"roi": roi, "index": index};
 }
 
+function colorZone(x, y, w, h) {
+		context.fillStyle = "rgba(0, 0, 255, 0.5)";
+		context.rect(x, y, w, h);
+		context.fill();
+}
+
 function handleSelect(eve) {
 		var data = selectClosestRect(eve);
 		var roi = data.roi;
-		context.clearRect(roi.left-2, roi.top-2, roi.w+4, roi.h+4);
-		console.log(roi);
+		context.clearRect(roi.left-conf.lineWidth, roi.top-conf.lineWidth, roi.w+conf.lineWidth*2, roi.h+conf.lineWidth*2);
 		if(data.index > -1) {
 				rois.splice(data.index, 1);
-				console.log(rois.length);
 		}
 }
 
@@ -140,11 +149,11 @@ function drawSquare() {
 		var height = Math.abs(h);
 
 		context.clearRect(previous.l, previous.t, previous.w, previous.h);
-		setPrevious(startX + offsetX-2, startY + offsetY-2, width+4, height+4);
+		setPrevious(startX + offsetX-conf.lineWidth, startY + offsetY-conf.lineWidth, width+conf.lineWidth*2, height+conf.lineWidth*2);
 
-		context.lineWidth = 2;
-		context.strokeStyle = 'orangered';
-		context.fillStyle = "#FFEFA3";
+		context.lineWidth = conf.lineWidth;
+		context.strokeStyle = conf.strokeStyle;
+		context.fillStyle = conf.fillStyle;
 		context.beginPath();
 		context.rect(startX + offsetX, startY + offsetY, width, height);
 		context.fill();
@@ -191,9 +200,9 @@ function load() {
 				that_canvas.style.top = 10 + '%';
 				that_canvas.style.left = 10 + '%';
 
-				context.lineWidth = 2;
-				context.strokeStyle = 'orangered';
-				context.fillStyle = "#FFEFA3";
+				context.lineWidth = conf.lineWidth;
+				context.strokeStyle = conf.strokeStyle;
+				context.fillStyle = conf.fillStyle;
 
 				for(var i = 0; i < rects.length; ++i) {
 						context.beginPath();

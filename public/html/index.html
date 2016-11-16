@@ -16,10 +16,11 @@
 		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position: absolute; right: 200px">
 			<input type="file" name="pic">
 			<input type="submit" value="Upload photo">
+			<input type="text" name="threshold">
 		</form>
 
 		<div id="image_container">
-			<img id="image" src="" alt="image_holder">
+			<img id="image" src="">
 		</div>
 		<canvas id="canvas" height=0 width=0></canvas>
 		<script type="text/javascript" src="../js/script.js"></script>

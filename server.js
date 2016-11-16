@@ -38,10 +38,14 @@ app.get('/mosaic', function(req, res){
 });
 
 app.post('/upload', function(req, res) {
+		var threshold = 0;
+		if(typeof req.body.threshold !== 'undefined')
+				threshold = req.body.threshold;
+
 		if(typeof req.file === 'undefined')
 				res.redirect('/');
 		else {
-				exec('./get_roi', [options.root + options.originals + req.file.filename],function(err, data) {
+				exec('./get_roi', [options.root + options.originals + req.file.filename, threshold],function(err, data) {
 						var rectsStr = "&rects=" + data;
 						res.redirect('/?file=' + options.originals + req.file.filename + rectsStr);
 				});
