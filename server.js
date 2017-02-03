@@ -30,6 +30,8 @@ var options = {
 	thumbnails: "/img/thumbnails/"
 };
 
+var advancement = {'percentageAdvancement': 0, 'currentFile': ''};
+
 var walk = function(dir, done) {
 	var results = [];
 	fs.readdir(dir, function(err, list) {
@@ -120,6 +122,7 @@ app.post('/upload', function(req, res) {
 					fs.unlinkSync(req.file.path);
 
 					walk(dirName, function(err, results) {
+						var nDone = 1;
 						if (err) throw err;
 						for(var i=0; i < results.length; i++) {
 							exec('./get_roi', [results[i], threshold],function(err, data) {
@@ -127,12 +130,14 @@ app.post('/upload', function(req, res) {
 								if(typeof curData[0] != 'undefined')
 									curData[0].src = data.split('|')[1].slice(0,-1);
 								cropImg(curData);
-
+								advancement.percentageAdvancement = Math.floor(nDone * 100 / results.length);
+								nDone++;
+								advancement.currentFile = curData[0].src;
 							});
 						}
 					});
 
-					res.redirect('/');
+					res.redirect('/?loading=loading');
 				})
 			);
 		} else {
@@ -144,6 +149,14 @@ app.post('/upload', function(req, res) {
 			});
 		}
 		
+	}
+});
+
+app.get('/advancement', function(req, res) {
+	res.send(advancement);
+	if(advancement.percentageAdvancement >=100) {
+		advancement.percentageAdvancement = 0;
+		advancement.currentFile = "";
 	}
 });
 

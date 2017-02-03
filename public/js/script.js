@@ -38,6 +38,39 @@ var rect = {
 
 var rects = JSON.parse(getURLParameter('rects'));
 
+var loading = getURLParameter('loading');
+var refreshIntervalId;
+if(typeof loading !== 'undefined' && loading != null && loading !== 'null') {
+	document.getElementById("progress-div").style.display = "block";
+	refreshIntervalId = setInterval('loadAdvancement()', 500);
+}
+
+function loadAdvancement() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			var adv = JSON.parse(this.responseText).percentageAdvancement;
+			var curFileArrayName = JSON.parse(this.responseText).currentFile.split('/');
+			var curFile = curFileArrayName[curFileArrayName.length-1];
+			document.getElementById("progress").setAttribute("value", adv);
+			document.getElementById("progess-label").setAttribute("data-value", adv);
+			document.getElementById("progess-label").innerHTML = curFile;
+			document.getElementById("progress-inner-span").innerHTML = adv + "%";
+
+			if(adv >= "100"){
+				clearInterval(refreshIntervalId);
+				document.getElementById("extract-msg").innerHTML = "<span class='done'>Extracting done !</span><br><span class='done'>Detecting and croping images done !</span>";		
+				return;
+			}
+			if(adv > 0) {
+				document.getElementById("extract-msg").innerHTML = "<span class='done'>Extracting done !</span><br><span class='pending'>Detecting and croping images...</span>";		
+			}
+		}
+	};
+	xhttp.open("GET", "/advancement", true);
+	xhttp.send();
+}
+
 if(filepath != null) {
 	image.src = filepath;
 	canvas_height = 0;

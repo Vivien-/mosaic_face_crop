@@ -12,14 +12,25 @@
 		<div id="croping" class="hide">Croping the chosen area...</div>
 		<div id="croped" class="hide">Done !</div>
 		<div id="error" class="hide"></div>
-		
+
+		<div id="progress-div">
+			<p id="extract-msg"><span class="pending">Extracting files...<span></p>
+			<progress max="100" id="progress" class="progress-color">
+				<!-- Browsers that support HTML5 progress element will ignore the html inside `progress` element. Whereas older browsers will ignore the `progress` element and instead render the html inside it. -->
+				<div class="progress-bar">
+					<span id="progress-inner-span"></span>
+				</div>
+			</progress>
+			<p id="progess-label" data-value="">Progess</p>
+		</div>
+
 		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position:absolute; right: 200px">
 			<div style="float:left">
-				<label>Chose a picture or a .tar file</label><input type="file" name="pic">
+				<label>1. Chose a picture or a .tar file</label><input type="file" name="pic">
 			</div>
-				
-			<div style="float:left"><input type="submit" value="Upload file"></div>
-			<div style="float:left"><input type="text" name="threshold" placeholder="Detector precision (default 0)"></div>
+			<div style="float:left; margin-right: 20px"><label>2. (opt.) Precision ∈ [-1, 1]</label><input type="text" name="threshold" placeholder="Detector precision (default 0)"></div>	
+			<div style="float:left"><label>3. Run script</label><input type="submit" value="Upload file"></div>
+			
 		</form>
 
 		<div id="image_container">
