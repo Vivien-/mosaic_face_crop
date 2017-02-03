@@ -13,10 +13,13 @@
 		<div id="croped" class="hide">Done !</div>
 		<div id="error" class="hide"></div>
 		
-		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position: absolute; right: 200px">
-			<input type="file" name="pic">
-			<input type="submit" value="Upload photo">
-			<input type="text" name="threshold">
+		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position:absolute; right: 200px">
+			<div style="float:left">
+				<label>Chose a picture or a .tar file</label><input type="file" name="pic">
+			</div>
+				
+			<div style="float:left"><input type="submit" value="Upload file"></div>
+			<div style="float:left"><input type="text" name="threshold" placeholder="Detector precision (default 0)"></div>
 		</form>
 
 		<div id="image_container">

@@ -5,10 +5,11 @@
 		<title>Mosaic display</title>
 		<link rel="stylesheet" href="../css/blueimp-gallery.min.css">
 		<link rel="stylesheet" href="../css/style.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	</head>
 	<body>
 		<a class="button" href="/">Upload new image</a>
-		<a class="button" href="#">Mosaic</a>
+		<a class="button" href="/mosaic">Mosaic</a>
 
 		<!-- The Gallery as lightbox dialog, should be a child element of the document body -->
 		<div id="blueimp-gallery" class="blueimp-gallery">
@@ -20,8 +21,11 @@
 			<a class="play-pause"></a>
 			<ol class="indicator"></ol>
 		</div>
-		
-		<div id="links"></div>
+
+		<div id="wrapper">
+			<div id="folders"></div>
+			<div id="links"></div>
+		</div>
 
 		<script src="../js/jquery-1.12.3.min.js"></script>
 		<script src="../js/blueimp-gallery.min.js"></script>

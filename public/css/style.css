@@ -10,9 +10,12 @@ html, body {
 		min-height: 100%
 }
 
+input, label {
+    display:block;
+}
 
-#links{
-		margin-top: 50px;
+#wrapper{
+		margin: 50px;
 }
 
 .button {
@@ -24,6 +27,12 @@ html, body {
 		text-decoration: none;
 		display: inline-block;
 		font-size: 13px;
+}
+
+
+.margin-sides {
+	margin-left: 10px;
+	margin-bottom: 10px !important;
 }
 
 .hide {
