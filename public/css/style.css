@@ -69,3 +69,15 @@ div.show {
 		color: #D8000C;
 		background-color: #FFBABA;
 }
+
+#crop {
+	display: none;
+	position: fixed;
+    left: 10px;
+    top: 50px;
+    z-index: 110;
+    height: 80px;
+    width: 100px;
+    background: green;
+    color: wheat;
+}

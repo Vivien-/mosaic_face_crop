@@ -91,7 +91,7 @@ var cropImg = function(data) {
 }
 
 app.use(express.static('public'));
-app.use(multer({ storage: storage }).single('pic'));
+app.use(multer({ storage: storage }).single('fileToUpload'));
 
 app.get('/', function(rq, res) {
 	res.sendFile("html/index.html", options);
@@ -136,15 +136,15 @@ app.post('/upload', function(req, res) {
 							});
 						}
 					});
-
-					res.redirect('/?loading=loading');
+					console.log("Detecting and croping");
+					res.send('croping');
 				})
 			);
 		} else {
 			exec('./get_roi', [options.root + options.originals + req.file.filename, threshold],function(err, data) {
 				var curData = data.split('|')[0];
-				var rectsStr = "&rects=" + curData;
-				res.redirect('/?file=' + options.originals + req.file.filename + rectsStr);
+				var rectsStr = curData;
+				res.send('{"filepath":"' + options.originals + req.file.filename + '", "rects":' + rectsStr+'}');
 
 			});
 		}

@@ -23,8 +23,14 @@ img { display: block; }
 	display: none;
 	width: 500px;
 	color: white;
-	position: absolute;
-	left: 30px;
+    position: fixed;
+    top: 200px;
+    left: 50%;
+    margin-left: -250px;
+}
+
+#progress-computing, #extract-msg {
+	display: none;
 }
 
 .done {

@@ -27,7 +27,7 @@ function getURLParameter(name) {
 }
 
 //get image path
-var filepath = getURLParameter('file');
+// var filepath = getURLParameter('file');
 
 var rect = {
 	x: getURLParameter('x'), 
@@ -38,11 +38,74 @@ var rect = {
 
 var rects = JSON.parse(getURLParameter('rects'));
 
-var loading = getURLParameter('loading');
 var refreshIntervalId;
-if(typeof loading !== 'undefined' && loading != null && loading !== 'null') {
-	document.getElementById("progress-div").style.display = "block";
-	refreshIntervalId = setInterval('loadAdvancement()', 500);
+
+function fileSelected() {
+	var file = document.getElementById('fileToUpload').files[0];
+	if (file) {
+		var fileSize = 0;
+		if (file.size > 1024 * 1024)
+			fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
+		else
+			fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
+
+		document.getElementById('progress-div').style.display = "block";
+		document.getElementById('progess-label-upload').innerHTML = file.name + " ("+fileSize+")";
+	}
+}
+
+function uploadFile() {
+	var fd = new FormData();
+	fd.append("fileToUpload", document.getElementById('fileToUpload').files[0]);
+	var xhr = new XMLHttpRequest();
+	xhr.upload.addEventListener("progress", uploadProgress, false);
+	xhr.addEventListener("load", uploadComplete, false);
+	xhr.addEventListener("error", uploadFailed, false);
+	xhr.addEventListener("abort", uploadCanceled, false);
+	xhr.open("POST", "/upload");
+	xhr.send(fd);
+}
+
+function uploadProgress(evt) {
+	if (evt.lengthComputable) {
+		var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+		document.getElementById("progress-upload").setAttribute("value", percentComplete);
+		document.getElementById("progess-label-upload").setAttribute("data-value", percentComplete);
+		document.getElementById("upload-label").innerHTML = "Uploading file...";
+		if(percentComplete >= 100) {
+			document.getElementById("extract-msg").style.display = "block";	
+			document.getElementById("upload-label").innerHTML = "Uploaded !";
+			document.getElementById("upload-label").className = "done";
+		}
+	} else {
+		document.getElementById('progressNumber').innerHTML = 'unable to compute';
+	}
+}
+
+function uploadComplete(evt) {
+	if(evt.target.responseText === 'croping') {
+		document.getElementById("upload-label").innerHTML = "Uploaded !";
+		document.getElementById("upload-label").className = "done";
+		document.getElementById("extract-msg").style.display = "block";
+		document.getElementById("extract-msg-span").innerHTML = "Extracting files...";
+		refreshIntervalId = setInterval('loadAdvancement()', 500);
+	} else {
+		document.getElementById('progress-div').style.display = "none";
+		document.getElementById('extract-msg').style.display = "none";
+		document.getElementById('progress-computing').style.display = "none";
+
+		document.getElementById('crop').style.display = 'block';
+		rects = JSON.parse(evt.target.responseText).rects;
+		workOnImage(JSON.parse(evt.target.responseText).filepath);
+	}
+}
+
+function uploadFailed(evt) {
+	alert("There was an error attempting to upload the file.");
+}
+
+function uploadCanceled(evt) {
+	alert("The upload has been canceled by the user or the browser dropped the connection.");
 }
 
 function loadAdvancement() {
@@ -63,6 +126,7 @@ function loadAdvancement() {
 				return;
 			}
 			if(adv > 0) {
+				document.getElementById("progress-computing").style.display = "block";
 				document.getElementById("extract-msg").innerHTML = "<span class='done'>Extracting done !</span><br><span class='pending'>Detecting and croping images...</span>";		
 			}
 		}
@@ -71,12 +135,15 @@ function loadAdvancement() {
 	xhttp.send();
 }
 
-if(filepath != null) {
-	image.src = filepath;
-	canvas_height = 0;
-	canvas_width = 0;
-	load();
-}
+
+function workOnImage(filepath) {
+	if(filepath != null) {
+		image.src = filepath;
+		canvas_height = 0;
+		canvas_width = 0;
+		load();
+	}	
+} 
 
 var previous = {l: 0, t: 0, w: 0, h: 0};
 

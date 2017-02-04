@@ -8,29 +8,42 @@
 	</head>
 	<body>
 		<a class="button" href="/mosaic">Mosaic</a>
-		<button id="crop" type="button">Validate ROI</button>
+		<button id="crop" type="button">Validate ROIs</button>
 		<div id="croping" class="hide">Croping the chosen area...</div>
 		<div id="croped" class="hide">Done !</div>
 		<div id="error" class="hide"></div>
 
 		<div id="progress-div">
-			<p id="extract-msg"><span class="pending">Extracting files...<span></p>
-			<progress max="100" id="progress" class="progress-color">
-				<!-- Browsers that support HTML5 progress element will ignore the html inside `progress` element. Whereas older browsers will ignore the `progress` element and instead render the html inside it. -->
-				<div class="progress-bar">
-					<span id="progress-inner-span"></span>
-				</div>
-			</progress>
-			<p id="progess-label" data-value="">Progess</p>
+			<p id="upload-label" class="pending">Ready to upload</p>
+			<progress max="100" id="progress-upload" class="progress-color"></progress>
+			<p id="progess-label-upload" data-value="">Upload progress</p>
+
+			<p id="extract-msg"><span id="extract-msg-span" class="pending">Computing next step...</span></p>
+
+			<div id="progress-computing">
+				<progress max="100" id="progress" class="progress-color">
+					<!-- Browsers that support HTML5 progress element will ignore the html inside `progress` element. Whereas older browsers will ignore the `progress` element and instead render the html inside it. -->
+					<div class="progress-bar">
+						<span id="progress-inner-span"></span>
+					</div>
+				</progress>
+				<p id="progess-label" data-value="">Progess</p>
+			</div>
 		</div>
 
 		<form method="post" action="/upload" enctype="multipart/form-data" style="color:#fff; position:absolute; right: 200px">
 			<div style="float:left">
-				<label>1. Chose a picture or a .tar file</label><input type="file" name="pic">
+				<label>1. Chose a picture or a .tar file</label>
+				<input id="fileToUpload" onchange="fileSelected();" type="file" name="fileToUpload"/>
 			</div>
-			<div style="float:left; margin-right: 20px"><label>2. (opt.) Precision ∈ [-1, 1]</label><input type="text" name="threshold" placeholder="Detector precision (default 0)"></div>	
-			<div style="float:left"><label>3. Run script</label><input type="submit" value="Upload file"></div>
-			
+			<div style="float:left; margin-right: 20px">
+				<label>2. (opt.) Precision ∈ [-1, 1]</label>
+				<input type="text" name="threshold" placeholder="Detector precision (default 0)">
+			</div>	
+			<div style="float:left">
+				<label>3. Run script</label>
+				<input type="button" onclick="uploadFile()" value="Upload file">
+			</div>
 		</form>
 
 		<div id="image_container">
