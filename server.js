@@ -55,7 +55,7 @@ var walk = function(dir, done) {
 	});
 };
 
-var cropImg = function(data) {
+var cropImgs = function(data, callback) {
 	// var filename = data[0].src.replace(/^.*[\\\/]/, '');
 	var filename = data[0].src;
 	var dest = filename.replace(options.originals, options.thumbnails);
@@ -88,6 +88,7 @@ var cropImg = function(data) {
 		var cur = data[i];
 		cropImg(cur.width, cur.height, cur.left, cur.top, i);
 	}
+	callback();
 }
 
 app.use(express.static('public'));
@@ -121,23 +122,40 @@ app.post('/upload', function(req, res) {
 				function() {
 					fs.unlinkSync(req.file.path);
 
-					walk(dirName, function(err, results) {
-						var nDone = 1;
-						if (err) throw err;
-						for(var i=0; i < results.length; i++) {
-							exec('./get_roi', [results[i], threshold],function(err, data) {
-								var curData = JSON.parse(data.split('|')[0]);
-								if(typeof curData[0] != 'undefined')
-									curData[0].src = data.split('|')[1].slice(0,-1);
-								cropImg(curData);
-								advancement.percentageAdvancement = Math.floor(nDone * 100 / results.length);
-								nDone++;
-								advancement.currentFile = curData[0].src;
+					var detectAndCrop = function(images, index) {
+						exec('./get_roi', [images[index], threshold],function(err, data) {
+							var curData = JSON.parse(data.split('|')[0]);
+							if(typeof curData[0] != 'undefined')
+								curData[0].src = data.split('|')[1].slice(0,-1);
+							cropImgs(curData, function() {
+								advancement.percentageAdvancement = index * 100 / images.length;
+								advancement.currentFile = curData[0].src;	
+								index++;
+								if(index < images.length) {
+									detectAndCrop(images, index);
+								}
 							});
-						}
+						});
+					}
+					res.send('croping');
+
+					walk(dirName, function(err, results) {
+						detectAndCrop(results, 0);
+						// var nDone = 1;
+						// if (err) throw err;
+						// for(var i=0; i < results.length; i++) {
+						// 	exec('./get_roi', [results[i], threshold],function(err, data) {
+						// 		var curData = JSON.parse(data.split('|')[0]);
+						// 		if(typeof curData[0] != 'undefined')
+						// 			curData[0].src = data.split('|')[1].slice(0,-1);
+						// 		cropImg(curData);
+						// 		advancement.percentageAdvancement = Math.floor(nDone * 100 / results.length);
+						// 		nDone++;
+						// 		advancement.currentFile = curData[0].src;
+						// 	});
+						// }
 					});
 					console.log("Detecting and croping");
-					res.send('croping');
 				})
 			);
 		} else {
@@ -211,6 +229,7 @@ app.post('/images', function (req, res) {
 
 
 	walk(path, function(err, results) {
+		results = results.sort();
 		if (err) { console.error(err); res.send(jsonResponse); return; }
 		for(var i = 1; i < results.length; i++){
 			var curRes = results[i].split(path)[1];

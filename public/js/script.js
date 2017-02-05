@@ -50,7 +50,7 @@ function fileSelected() {
 			fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
 
 		document.getElementById('progress-div').style.display = "block";
-		document.getElementById('progess-label-upload').innerHTML = file.name + " ("+fileSize+")";
+		document.getElementById('progress-label-upload').innerHTML = file.name + " ("+fileSize+")";
 	}
 }
 
@@ -70,7 +70,7 @@ function uploadProgress(evt) {
 	if (evt.lengthComputable) {
 		var percentComplete = Math.round(evt.loaded * 100 / evt.total);
 		document.getElementById("progress-upload").setAttribute("value", percentComplete);
-		document.getElementById("progess-label-upload").setAttribute("data-value", percentComplete);
+		document.getElementById("progress-label-upload").setAttribute("data-value", percentComplete);
 		document.getElementById("upload-label").innerHTML = "Uploading file...";
 		if(percentComplete >= 100) {
 			document.getElementById("extract-msg").style.display = "block";	
@@ -116,8 +116,8 @@ function loadAdvancement() {
 			var curFileArrayName = JSON.parse(this.responseText).currentFile.split('/');
 			var curFile = curFileArrayName[curFileArrayName.length-1];
 			document.getElementById("progress").setAttribute("value", adv);
-			document.getElementById("progess-label").setAttribute("data-value", adv);
-			document.getElementById("progess-label").innerHTML = curFile;
+			document.getElementById("progress-label").setAttribute("data-value", Math.floor(adv));
+			document.getElementById("progress-label").innerHTML = curFile;
 			document.getElementById("progress-inner-span").innerHTML = adv + "%";
 
 			if(adv >= "100"){
@@ -125,7 +125,7 @@ function loadAdvancement() {
 				document.getElementById("extract-msg").innerHTML = "<span class='done'>Extracting done !</span><br><span class='done'>Detecting and croping images done !</span>";		
 				return;
 			}
-			if(adv > 0) {
+			if(adv >= 0) {
 				document.getElementById("progress-computing").style.display = "block";
 				document.getElementById("extract-msg").innerHTML = "<span class='done'>Extracting done !</span><br><span class='pending'>Detecting and croping images...</span>";		
 			}
