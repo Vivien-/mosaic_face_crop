@@ -1,9 +1,14 @@
+# Résultats
+
+
 # Installation
+
 
 ## Prérequis
 
 1. nodejs, l'installation dépend de l'os mais tout est très bien expliqué ici (même pour mac) : https://nodejs.org/en/
 2. npm, qui est installé avec node. https://docs.npmjs.com/getting-started/installing-node
+3. Pour avoir les features d'auto-detection : utiliser detect-eyes (https://github.com/Vivien-/detect-eyes), compiler et placer l'executable dans la racine du projet mosaic_face_crop
 
 ## Mise en place de l'application
 
@@ -14,7 +19,7 @@
 `npm install` 
 install les dépendances
 
-#Configuration
+# Configuration
 
 Le fichier config.js permet de configurer votre application :
 Modifiez `config.options.root` par le chemin `$root/public`
