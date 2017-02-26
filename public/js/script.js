@@ -50,6 +50,7 @@ function fileSelected() {
 			fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
 
 		document.getElementById('progress-div').style.display = "block";
+		document.getElementById('delete-container').style.display = "none";
 		document.getElementById('progress-label-upload').innerHTML = file.name + " ("+fileSize+")";
 	}
 }
@@ -95,6 +96,8 @@ function uploadComplete(evt) {
 		document.getElementById('progress-computing').style.display = "none";
 
 		document.getElementById('crop').style.display = 'block';
+		document.getElementById('clear-image').style.display = 'block';
+		document.getElementById('cancel').style.display = 'block';
 		rects = JSON.parse(evt.target.responseText).rects;
 		workOnImage(JSON.parse(evt.target.responseText).filepath);
 	}
@@ -138,6 +141,7 @@ function loadAdvancement() {
 
 function workOnImage(filepath) {
 	if(filepath != null) {
+		document.getElementById('cancel').parentElement.href += filepath;
 		image.src = filepath;
 		canvas_height = 0;
 		canvas_width = 0;
@@ -154,6 +158,10 @@ function setPrevious(l, t, w, h) {
 	previous.h = h;
 }
 
+function cleanImage() {
+	rois = [];
+	context.clearRect(0, 0, canvas_width, canvas_height);
+}
 
 function init() {
 	canvas = document.getElementById("canvas");

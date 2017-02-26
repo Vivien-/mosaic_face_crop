@@ -128,7 +128,7 @@ app.post('/upload', function(req, res) {
 							if(typeof curData[0] != 'undefined')
 								curData[0].src = data.split('|')[1].slice(0,-1);
 							cropImgs(curData, function() {
-								advancement.percentageAdvancement = index * 100 / images.length;
+								advancement.percentageAdvancement = (index+1) * 100 / images.length;
 								advancement.currentFile = curData[0].src;	
 								index++;
 								if(index < images.length) {
@@ -141,19 +141,6 @@ app.post('/upload', function(req, res) {
 
 					walk(dirName, function(err, results) {
 						detectAndCrop(results, 0);
-						// var nDone = 1;
-						// if (err) throw err;
-						// for(var i=0; i < results.length; i++) {
-						// 	exec('./get_roi', [results[i], threshold],function(err, data) {
-						// 		var curData = JSON.parse(data.split('|')[0]);
-						// 		if(typeof curData[0] != 'undefined')
-						// 			curData[0].src = data.split('|')[1].slice(0,-1);
-						// 		cropImg(curData);
-						// 		advancement.percentageAdvancement = Math.floor(nDone * 100 / results.length);
-						// 		nDone++;
-						// 		advancement.currentFile = curData[0].src;
-						// 	});
-						// }
 					});
 					console.log("Detecting and croping");
 				})
@@ -177,6 +164,15 @@ app.get('/advancement', function(req, res) {
 		advancement.currentFile = "";
 	}
 });
+
+app.get('/delete', function(req, res) {
+	res.send(advancement);
+	if(advancement.percentageAdvancement >=100) {
+		advancement.percentageAdvancement = 0;
+		advancement.currentFile = "";
+	}
+});
+
 
 app.post('/crop', function(req, res){
 	var data = req.body;
@@ -212,7 +208,6 @@ app.post('/crop', function(req, res){
 	}
 	
 	options.uploaded = true;
-	// res.redirect('/mosaic');
 });
 
 app.post('/images', function (req, res) {
@@ -225,29 +220,65 @@ app.post('/images', function (req, res) {
 	var mediumHeight = 0;
 	var mediumWidth = 0;
 
-	var path = options.root+options.thumbnails + _path;
+	if(typeof req.query.originalsImage != 'undefined') {
+		var path = options.root+options.originals + _path;
 
-
-	walk(path, function(err, results) {
-		results = results.sort();
-		if (err) { console.error(err); res.send(jsonResponse); return; }
-		for(var i = 1; i < results.length; i++){
-			var curRes = results[i].split(path)[1];
-			var fname = curRes.replace(options.thumbnails, options.originals).slice(0, curRes.lastIndexOf('_'));
-			jsonResponse.locations.push({
-				thumbnail: curRes,
-				original: fname
+		function addItem(item, itemDone, f) {
+			fs.stat(path + '/' +item, function(err, stats) {
+				if(!item.startsWith('.')) {
+					if (stats.isFile()) {
+						jsonResponse.files.push(item);
+					} else if (stats.isDirectory()) {
+						jsonResponse.directories.push(item);
+					}
+				}
+				itemDone.t ++;
+				f();
 			});
-			var dimensions = sizeOf(results[i]);
-			mediumHeight += dimensions.height;
-			mediumWidth += dimensions.width;
 		}
 
-		jsonResponse.mediumHeight = mediumHeight/jsonResponse.locations.length;
-		jsonResponse.mediumWidth = mediumWidth/jsonResponse.locations.length;
-		res.send(jsonResponse);
-	});
+		fs.readdir(path, function(err, results) {
+			var items = results.sort();
+			jsonResponse.files = [];
+			jsonResponse.directories = [];
+			var itemDone = {t:0};
+			for (var i=0; i<items.length; i++) {
+				var item = items[i];
+				addItem(item, itemDone, function(){
+					if(itemDone.t == items.length){
+						res.send(jsonResponse);
+					}
+				});
+			}
+			if(!items.length) {
+				res.send(jsonResponse);
+			}
+		});
+	} else {
+		var path = options.root+options.thumbnails + _path;
+		walk(path, function(err, results) {
+			results = results.sort();
+			if (err) { console.error(err); res.send(jsonResponse); return; }
+			for(var i = 1; i < results.length; i++){
+				var curRes = results[i].split(path)[1];
+				var fname = curRes.replace(options.thumbnails, options.originals).slice(0, curRes.lastIndexOf('_'));
+				jsonResponse.locations.push({
+					thumbnail: curRes,
+					original: fname
+				});
+				var dimensions = sizeOf(results[i]);
+				mediumHeight += dimensions.height;
+				mediumWidth += dimensions.width;
+			}
+
+			jsonResponse.mediumHeight = mediumHeight/jsonResponse.locations.length;
+			jsonResponse.mediumWidth = mediumWidth/jsonResponse.locations.length;
+			res.send(jsonResponse);
+		});
+	}
 });
+
+
 
 app.listen(3000, function () {
 	console.log('mosaic app listening on port 3000!');

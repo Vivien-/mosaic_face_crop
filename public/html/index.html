@@ -8,7 +8,10 @@
 	</head>
 	<body>
 		<a class="button" href="/mosaic">Mosaic</a>
-		<button id="crop" type="button">Validate ROIs</button>
+		<a class="button" id="delete-images" href="#">Delete image</a>
+		<button class="button-image" id="crop" type="button">Validate ROIs</button>
+		<button class="button-image" id="clear-image" type="button" onclick="cleanImage();">Clear ROIs</button>
+		<a href="/delete?file="><button id="cancel" class="button-image" type="button">Cancel</button></a>
 		<div id="croping" class="hide">Croping the chosen area...</div>
 		<div id="croped" class="hide">Done !</div>
 		<div id="error" class="hide"></div>
@@ -49,8 +52,18 @@
 		<div id="image_container">
 			<img id="image" src="">
 		</div>
+
+		<div id="delete-container">
+			<div id="wrapper">
+				<div id="folders"></div>
+				<div id="links"></div>
+			</div>
+		</div>
+
 		<canvas id="canvas" height=0 width=0></canvas>
+		<script src="../js/jquery-1.12.3.min.js"></script>
 		<script type="text/javascript" src="../js/script.js"></script>
 		<script type="text/javascript" src="../js/send_data.js"></script>
+		<script type="text/javascript" src="../js/delete_images.js"></script>
 	</body>
 </html>

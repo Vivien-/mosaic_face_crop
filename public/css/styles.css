@@ -17,8 +17,6 @@ canvas {
 	z-index: 1;
 }
 
-img { display: block; }
-
 #progress-div {
 	display: none;
 	width: 500px;
@@ -154,4 +152,32 @@ p[data-value]:after {
 		rgba(255, 255, 255, .25),
 		rgba(0,0,0,.2)),
 	-moz-linear-gradient( left, #09c, #2a8d2e);
+}
+
+.overlay {
+	background:rgba(0,0,0,.75);
+	text-align:center;
+	opacity:0;
+	-webkit-transition: opacity .25s ease;
+}
+
+.box {
+	box-shadow:inset 1px 1px 40px 0 rgba(0,0,0,.45);
+	border:1px solid #fff;
+	background-size:cover !important;
+	border-radius:3px;
+	margin: 1px;
+	display: inline-block;
+}
+
+.box:hover .overlay {
+	opacity:1;
+	cursor: pointer;
+}
+
+.plus {  
+	font-family:Helvetica;
+	font-weight:900;
+	color:rgba(255, 0, 0, 0.5);
+	font-size:130px;
 }
