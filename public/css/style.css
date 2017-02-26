@@ -136,3 +136,16 @@ div.show {
     border: 1px solid transparent;
     border-radius: 4px;
 }
+
+.delete-folder:after {
+    content: "X";
+    width: 30px;
+    height: 29px;
+    font-size: 21px;
+    float: left;
+    font-weight: bolder;
+    background: rgba(0, 0, 0, 0.17);
+    color: rgba(255, 0, 0, 0.72);
+    margin: 0 6px 0 0;
+    padding: 1px;
+}

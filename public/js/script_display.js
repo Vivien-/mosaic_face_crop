@@ -45,49 +45,18 @@ function buildFolders(folders) {
 
 function buildImages(images, height, width) {
 	for(var i = 0; i < images.length; i++){
-		$("#links").append(" <a href='"+pathOriginal+images[i].original +"'><img src='"+pathThumbnail+images[i].thumbnail + "' style='height:"+height+"px; width:"+width+"px;'></a>")
+		$("#links").append(" <a href='"+pathOriginal+images[i].replace(/_[0-9]*.png$/, '') +"'><img src='"+pathThumbnail+images[i] + "' style='height:"+height+"px; width:"+width+"px;'></a>")
 	}
-}
-
-function getcurrentDatas(json) {
-	var folders = [];
-	var images = [];
-	for(var i = 0; i < json.length; i++) {
-		var th = json[i].thumbnail;
-		if(typeof th !== 'undefined') {
-			var itemName = th.split('/')[0];
-			if(typeof itemName !== 'undefined') {
-				if(itemName.endsWith('.png')) {
-					images.push(json[i]);
-				} else if(folders.indexOf(itemName) == -1){
-					folders.push(itemName);
-				}
-			}
-		}
-	}
-
-	return {'folders': folders, 'images': images};
-}
-
-function createFolders(json) {
-	var currentDatas = getcurrentDatas(json.locations);
-	buildFolders(currentDatas.folders);
-	buildImages(currentDatas.images, json.mediumHeight, json.mediumWidth);
 }
 
 function createView(json) {
-	// console.log(json);
-	createFolders(json);
+	buildFolders(json.directories);
+	buildImages(json.files, json.mediumHeight, json.mediumWidth);
 }
 
 function appendImages(data){
 	json = JSON.parse(data);
-	var locations = json.locations;
-	//create view
 	createView(json);
-	// for(var i = 0; i < locations.length; i++){
-	// 	$("#links").append(" <a href='"+locations[i].original.split("_")[0] +"'><img src='"+locations[i].thumbnail + "' style='height:"+json.mediumHeight+"px; width:"+json.mediumWidth+"px;'></a>")
-	// }
 
 	//Mosaic stuff
 	document.getElementById('links').onclick = function (event) {

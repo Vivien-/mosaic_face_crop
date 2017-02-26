@@ -12,7 +12,6 @@ var tar = require('tar-fs');
 var path = require('path');
 var request = require('request');
 
-
 var storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		cb(null, options.root+options.originals)
@@ -54,6 +53,33 @@ var walk = function(dir, done) {
 		});
 	});
 };
+
+var deleteFile = function(path) {
+	fs.unlink(path, function(err){
+		if (err) throw err;
+		console.log(path + " deleted");
+	});
+}
+
+var deleteOriginals = function(path) {
+	path = options.root + "/" +path;
+	deleteFile(path);
+}
+
+var deleteThumbnails = function(path) {
+	var _path = (options.root + "/" +path).replace(options.originals, options.thumbnails);
+	var tokenizedPath = _path.split('/'); 
+	var filename = tokenizedPath[tokenizedPath.length-1];
+	var pathWithoutFilename = _path.replace(filename, ''); 
+	fs.readdir(pathWithoutFilename, (error, files) => {
+		if (error) error;
+		for(var i = 0; i < files.length; i++) {
+			if(files[i].startsWith(filename)) {
+				deleteFile(pathWithoutFilename+files[i]);
+			}
+		}
+	});
+}
 
 var cropImgs = function(data, callback) {
 	// var filename = data[0].src.replace(/^.*[\\\/]/, '');
@@ -165,12 +191,10 @@ app.get('/advancement', function(req, res) {
 	}
 });
 
-app.get('/delete', function(req, res) {
-	res.send(advancement);
-	if(advancement.percentageAdvancement >=100) {
-		advancement.percentageAdvancement = 0;
-		advancement.currentFile = "";
-	}
+app.post('/delete', function(req, res) {
+	var _path = typeof req.query.path === 'undefined' || req.query.path === 'null' || req.query.path == null ? '' : req.query.path;
+	deleteOriginals(_path);
+	deleteThumbnails(_path);
 });
 
 
@@ -216,66 +240,54 @@ app.post('/images', function (req, res) {
 		_path = _path.substring(1);
 	}
 
-	var jsonResponse = {locations:[], mediumHeight:0, mediumWidth:0};
+	var jsonResponse = {files:[], directories:[], mediumHeight:0, mediumWidth:0};
 	var mediumHeight = 0;
 	var mediumWidth = 0;
 
-	if(typeof req.query.originalsImage != 'undefined') {
-		var path = options.root+options.originals + _path;
+	var type = typeof req.query.originalsImage != 'undefined' ? "originals" : "thumbnails";
 
-		function addItem(item, itemDone, f) {
-			fs.stat(path + '/' +item, function(err, stats) {
-				if(!item.startsWith('.')) {
-					if (stats.isFile()) {
-						jsonResponse.files.push(item);
-					} else if (stats.isDirectory()) {
-						jsonResponse.directories.push(item);
-					}
+	var path = options.root + options[type] + _path;
+	function addItem(item, itemDone, f) {
+		fs.stat(path + '/' +item, function(err, stats) {
+			if(!item.startsWith('.')) {
+				if (stats.isFile()) {
+					var dimensions = sizeOf(options.root + options[type] + _path + item);
+					mediumHeight += dimensions.height;
+					mediumWidth += dimensions.width;
+					jsonResponse.files.push(item);
+				} else if (stats.isDirectory()) {
+					jsonResponse.directories.push(item);
 				}
-				itemDone.t ++;
-				f();
-			});
-		}
-
-		fs.readdir(path, function(err, results) {
-			var items = results.sort();
-			jsonResponse.files = [];
-			jsonResponse.directories = [];
-			var itemDone = {t:0};
-			for (var i=0; i<items.length; i++) {
-				var item = items[i];
-				addItem(item, itemDone, function(){
-					if(itemDone.t == items.length){
-						res.send(jsonResponse);
-					}
-				});
 			}
-			if(!items.length) {
-				res.send(jsonResponse);
-			}
-		});
-	} else {
-		var path = options.root+options.thumbnails + _path;
-		walk(path, function(err, results) {
-			results = results.sort();
-			if (err) { console.error(err); res.send(jsonResponse); return; }
-			for(var i = 1; i < results.length; i++){
-				var curRes = results[i].split(path)[1];
-				var fname = curRes.replace(options.thumbnails, options.originals).slice(0, curRes.lastIndexOf('_'));
-				jsonResponse.locations.push({
-					thumbnail: curRes,
-					original: fname
-				});
-				var dimensions = sizeOf(results[i]);
-				mediumHeight += dimensions.height;
-				mediumWidth += dimensions.width;
-			}
-
-			jsonResponse.mediumHeight = mediumHeight/jsonResponse.locations.length;
-			jsonResponse.mediumWidth = mediumWidth/jsonResponse.locations.length;
-			res.send(jsonResponse);
+			itemDone.t ++;
+			f();
 		});
 	}
+
+	fs.readdir(path, function(err, results) {
+		if(typeof results === 'undefined' || err) {
+			console.err("Cant read folder : " + path);
+			res.send(jsonResponse);
+		}
+
+		var items = results.sort();
+		jsonResponse.files = [];
+		jsonResponse.directories = [];
+		var itemDone = {t:0};
+		for (var i=0; i<items.length; i++) {
+			var item = items[i];
+			addItem(item, itemDone, function(){
+				if(itemDone.t == items.length){
+					jsonResponse.mediumHeight = mediumHeight/jsonResponse.files.length;
+					jsonResponse.mediumWidth = mediumWidth/jsonResponse.files.length;
+					res.send(jsonResponse);
+				}
+			});
+		}
+		if(!items.length) {
+			res.send(jsonResponse);
+		}
+	});
 });
 
 
