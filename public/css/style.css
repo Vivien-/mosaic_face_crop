@@ -137,7 +137,7 @@ div.show {
     border-radius: 4px;
 }
 
-.delete-folder:after {
+/*.delete-folder:after {
     content: "X";
     width: 30px;
     height: 29px;
@@ -148,4 +148,4 @@ div.show {
     color: rgba(255, 0, 0, 0.72);
     margin: 0 6px 0 0;
     padding: 1px;
-}
+}*/

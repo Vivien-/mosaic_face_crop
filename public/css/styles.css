@@ -181,3 +181,13 @@ p[data-value]:after {
 	color:rgba(255, 0, 0, 0.5);
 	font-size:130px;
 }
+
+.folder-delete {
+	color: white;
+	cursor: pointer;
+}
+
+.folder-delete:hover {
+	color: white;
+	cursor: pointer;
+}

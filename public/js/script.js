@@ -79,7 +79,7 @@ function uploadProgress(evt) {
 			document.getElementById("upload-label").className = "done";
 		}
 	} else {
-		document.getElementById('progressNumber').innerHTML = 'unable to compute';
+		document.getElementById('progress-upload').innerHTML = 'unable to compute';
 	}
 }
 

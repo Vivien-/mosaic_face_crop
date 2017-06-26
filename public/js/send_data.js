@@ -8,7 +8,7 @@ y = w.innerHeight|| e.clientHeight|| g.clientHeight;
 var send_crop = d.getElementById("crop");
 
 send_crop.addEventListener("click", function(){
-	showMessage("croping", ["error", "croped"], "info");
+	showMessage("croped", ["error", "croping"], "info");
 	post("/crop", rois, "post");
 });
 
@@ -34,7 +34,7 @@ function post(path, params, method) {
     			showMessage("croped", ["croping", "error"], "success");
     		} else {
     			showMessage("error", ["croping", "croped"], "error");
-    			document.getElementById(idsHide[i]).innerHTML = xmlhttp.statusText ;
+    			document.getElementById("error").innerHTML = xmlhttp.statusText ;
     		}
     	}
     }

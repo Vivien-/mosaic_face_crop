@@ -32,13 +32,15 @@ function buildFolders(folders) {
 	for(var i=0; i < folders.length; i++) {
 		var safeName = folders[i].replace(/[^A-Z0-9]+/ig, "_");
 
-		$("#folders").append('<span class="delete-folder btn btn-info btn-lg margin-sides" data-name="'+folders[i]+'" id="'+safeName+'"><span data-name="'+folders[i]+'" class="glyphicon glyphicon-folder-open"></span> '+folders[i]+'</span>');
+		$("#folders").append('<span class="delete-folder btn btn-info btn-lg margin-sides" data-name="'+folders[i]+'" id="'+safeName+'"><span data-name="'+folders[i]+'" class="glyphicon glyphicon-folder-open"></span> '+folders[i]+'</span><span class="folder-delete" data-request="'+pathOriginal+folders[i]+'" id="'+safeName+'-delete">delete</span>');
 		$("#"+safeName).on('click', function(e) {
 			window.location.href = 'http://localhost:3000/?path='+path+e.target.getAttribute('data-name')+'/';
 		});
-		$("#"+safeName+"::after").on('click', function(e) {
-			console.log("delete"); // TODO
-			// window.location.href = 'http://localhost:3000/?path='+path+e.target.getAttribute('data-name')+'/';
+		$("#"+safeName+"-delete").on('click', function(e) {
+			var p = e.currentTarget.getAttribute('data-request');
+			e.currentTarget.style.display = 'none';
+			document.getElementById(e.currentTarget.id.replace('-delete', '')).style.display = 'none'; 
+			httpGetAsync('/delete?path='+p, function() {});			// window.location.href = 'http://localhost:3000/?path='+path+e.target.getAttribute('data-name')+'/';
 		});
 	}
 }

@@ -11,6 +11,7 @@ var sizeOf = require('image-size');
 var tar = require('tar-fs');
 var path = require('path');
 var request = require('request');
+var rimraf = require('rimraf');
 
 var storage = multer.diskStorage({
 	destination: function (req, file, cb) {
@@ -55,10 +56,16 @@ var walk = function(dir, done) {
 };
 
 var deleteFile = function(path) {
-	fs.unlink(path, function(err){
-		if (err) throw err;
-		console.log(path + " deleted");
-	});
+	try {
+		fs.unlink(path, function(err){
+			if (err) console.log(err);
+			console.log(path + " deleted");
+		});
+		rimraf(path, function () { console.log('done'); });
+
+	} catch(e) {
+		console.log(e);
+	}
 }
 
 var deleteOriginals = function(path) {
@@ -110,6 +117,7 @@ var cropImgs = function(data, callback) {
 			console.log(err);
 		});
 	}
+	console.log(data);
 	for(var i = 0; i < data.length; ++i) {
 		var cur = data[i];
 		cropImg(cur.width, cur.height, cur.left, cur.top, i);
@@ -130,56 +138,62 @@ app.get('/mosaic', function(req, res){
 
 app.post('/upload', function(req, res) {
 	var threshold = 0;
-	if(typeof req.body.threshold !== 'undefined')
-		threshold = req.body.threshold;
+	try {
+		if(typeof req.body.threshold !== 'undefined')
+			threshold = req.body.threshold;
 
-	if(typeof req.file === 'undefined'){
-		res.redirect('/');
-	} else {
-		if(req.file.path.endsWith('tar')) {
-			var dirName = options.root + options.originals;
-			dirName += typeof req.file.originalname != 'undefined' ? req.file.originalname.split('.')[0] : 'default';
-
-			if (!fs.existsSync(dirName)){
-				fs.mkdirSync(dirName);
-			}
-
-			fs.createReadStream(req.file.path).pipe(tar.extract(options.root + options.originals).on('finish', 
-				function() {
-					fs.unlinkSync(req.file.path);
-
-					var detectAndCrop = function(images, index) {
-						exec('./get_roi', [images[index], threshold],function(err, data) {
-							var curData = JSON.parse(data.split('|')[0]);
-							if(typeof curData[0] != 'undefined')
-								curData[0].src = data.split('|')[1].slice(0,-1);
-							cropImgs(curData, function() {
-								advancement.percentageAdvancement = (index+1) * 100 / images.length;
-								advancement.currentFile = curData[0].src;	
-								index++;
-								if(index < images.length) {
-									detectAndCrop(images, index);
-								}
-							});
-						});
-					}
-					res.send('croping');
-
-					walk(dirName, function(err, results) {
-						detectAndCrop(results, 0);
-					});
-					console.log("Detecting and croping");
-				})
-			);
+		if(typeof req.file === 'undefined'){
+			res.redirect('/');
 		} else {
-			exec('./get_roi', [options.root + options.originals + req.file.filename, threshold],function(err, data) {
-				var curData = data.split('|')[0];
-				var rectsStr = curData;
-				res.send('{"filepath":"' + options.originals + req.file.filename + '", "rects":' + rectsStr+'}');
+			if(req.file.path.endsWith('tar')) {
+				var dirName = options.root + options.originals;
+				dirName += typeof req.file.originalname != 'undefined' ? req.file.originalname.split('.')[0] : 'default';
 
-			});
+				if (!fs.existsSync(dirName)){
+					fs.mkdirSync(dirName);
+				}
+
+				fs.createReadStream(req.file.path).pipe(tar.extract(options.root + options.originals).on('finish', 
+					function() {
+						fs.unlinkSync(req.file.path);
+
+						var detectAndCrop = function(images, index) {
+							exec('./get_roi', [images[index], threshold],function(err, data) {
+								var curData = JSON.parse(data.split('|')[0]);
+								console.log(data.split('|'));
+								console.log(data.split('|')[0]);
+								if(typeof curData[0] != 'undefined')
+									curData[0].src = data.split('|')[1].slice(0,-1);
+								cropImgs(curData, function() {
+									advancement.percentageAdvancement = (index+1) * 100 / images.length;
+									advancement.currentFile = curData[0].src;	
+									index++;
+									if(index < images.length) {
+										detectAndCrop(images, index);
+									}
+								});
+							});
+						}
+						res.send('croping');
+
+						walk(dirName, function(err, results) {
+							detectAndCrop(results, 0);
+						});
+						console.log("Detecting and croping");
+					})
+				);
+			} else {
+				exec('./get_roi', [options.root + options.originals + req.file.filename, threshold],function(err, data) {
+					var curData = data.split('|')[0];
+					var rectsStr = curData;
+					res.send('{"filepath":"' + options.originals + req.file.filename + '", "rects":' + rectsStr+'}');
+
+				});
+			}
+			
 		}
-		
+	} catch(e) {
+		console.log(e);
 	}
 });
 
@@ -266,26 +280,26 @@ app.post('/images', function (req, res) {
 
 	fs.readdir(path, function(err, results) {
 		if(typeof results === 'undefined' || err) {
-			console.err("Cant read folder : " + path);
+			console.log("Cant read folder : " + path);
 			res.send(jsonResponse);
-		}
-
-		var items = results.sort();
-		jsonResponse.files = [];
-		jsonResponse.directories = [];
-		var itemDone = {t:0};
-		for (var i=0; i<items.length; i++) {
-			var item = items[i];
-			addItem(item, itemDone, function(){
-				if(itemDone.t == items.length){
-					jsonResponse.mediumHeight = mediumHeight/jsonResponse.files.length;
-					jsonResponse.mediumWidth = mediumWidth/jsonResponse.files.length;
-					res.send(jsonResponse);
-				}
-			});
-		}
-		if(!items.length) {
-			res.send(jsonResponse);
+		} else {
+			var items = results.sort();
+			jsonResponse.files = [];
+			jsonResponse.directories = [];
+			var itemDone = {t:0};
+			for (var i=0; i<items.length; i++) {
+				var item = items[i];
+				addItem(item, itemDone, function(){
+					if(itemDone.t == items.length){
+						jsonResponse.mediumHeight = mediumHeight/jsonResponse.files.length;
+						jsonResponse.mediumWidth = mediumWidth/jsonResponse.files.length;
+						res.send(jsonResponse);
+					}
+				});
+			}
+			if(!items.length) {
+				res.send(jsonResponse);
+			}
 		}
 	});
 });
