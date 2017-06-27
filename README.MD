@@ -1,6 +1,6 @@
 # Résultats
 
-## Avec un upload d'image individuel
+## Avec un upload d'image individuel
 
 L'administrateur choisit :
 
@@ -18,7 +18,7 @@ L'administrateur choisit :
 ![s7](https://cloud.githubusercontent.com/assets/8009496/22622647/3a69645c-eb40-11e6-93a3-d41afdedca6a.png)
 
 
-## Avec un ensemble d'images
+## Avec un ensemble d'images
 
 En uploadant un fichier .tar contenant une arborescence de dossiers et d'images :
 1. L'UI indique l'avancement des différentes phase du job (upload, détection des yeux, crop des images)
